@@ -12,6 +12,7 @@
 
 import type { ReactElement } from 'react'
 import { useState } from 'react'
+import axios from 'axios'
 
 interface InputProps{
     nome: string,
@@ -46,8 +47,11 @@ import { FaPiggyBank,FaBalanceScaleRight } from 'react-icons/fa'
 import { AiOutlineBuild } from 'react-icons/ai'
 import { IoMdBuild } from 'react-icons/io'
 
+interface DashboardProps {
+    modalVisible: boolean
+}
 
-export default function Dashboard(){
+export default function Dashboard({modalVisible}: DashboardProps){
 
     const indicadores : Indicador[]= [
         {
@@ -354,19 +358,16 @@ export default function Dashboard(){
 
     const [open, setOpen] = useState<boolean>(false)
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
-    const handleOpen = (i: number) => {
-        setSelectedIndex(i)
-        
-      };
+    
     return(
-        <Card className='w-full lg:w-4/5'>
+        <Card className={`w-full lg:w-4/5 ${modalVisible?"blur-sm": '' }`}>
                 <List className='rounded-lg '>
             {indicadores.map((item,i)=>{
                 return(
                     
                         
                             <Accordion open={selectedIndex == i? true: false} key={i}>
-                                <AccordionHeader onClick={() =>handleOpen(i)}>
+                                <AccordionHeader onClick={() => setSelectedIndex(selectedIndex == i? 20: i)}>
                                     <div className={`bg-${item.cor} p-1 rounded-full`}>
                                         {item.icone}
                                     </div>
