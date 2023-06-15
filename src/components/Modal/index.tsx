@@ -11,6 +11,7 @@ import {
     CardHeader,
     CardBody
 } from '@material-tailwind/react'
+import { CgClose } from 'react-icons/cg'
 // const { 
 // 				categoria_id,
 // 				subcategoria_id,
@@ -37,8 +38,13 @@ const Modal = ({modalVisible, setModalVisible}: ModalProps) => {
     const [categories, setCategories] = useState<Category[]>([])
     const [category, setCategory] = useState<Category>()
     const [subcategories, setSubcategories] = useState<Subcategory[]>([])
-    const [descricao, setDescricao] = useState<string>()
-    const [valor, setValor] = useState<number>()
+    const [subcategory, setSubcategory] = useState<Subcategory>({
+        id: '',
+        nome:'',
+        categoryid: ''
+    })
+    const [descricao, setDescricao] = useState<string>('')
+    const [valor, setValor] = useState<number>(0)
     
     useEffect(()=>{
         const getCategories = async() =>{
@@ -62,6 +68,23 @@ const Modal = ({modalVisible, setModalVisible}: ModalProps) => {
             console.log(error)
         }
     }
+
+    const sendOperation = async() => {
+        try {
+            const operation = {
+                categoria_id: category?.id,
+ 				subcategoria_id: subcategory?.id,
+ 				descricao,
+			    valor
+            }
+            const response = await axios.post(`${URI}/operations`,operation)
+            console.log(response)
+            console.log(operation)
+            setModalVisible(false)
+        } catch (error) {
+            console.log(error)
+        }
+    }
   return (
     <div className={`ml-32 mr-auto absolute w-3/4 mt-40 ${modalVisible? '': 'hidden'}`}>
         <Card className='shadow-2xl'>
@@ -70,16 +93,20 @@ const Modal = ({modalVisible, setModalVisible}: ModalProps) => {
                 
                 
                 <CardBody className='flex flex-col gap-10'>
-                <Typography className=' font-bold text-xl'>Nova Operação</Typography>
+                    <div className='flex justify-between items-center'>
+                        <Typography className=' font-bold text-xl'>Nova Operação</Typography>
+                        <CgClose className='font-bold text-xl text-blue-gray-900 hover:cursor-pointer' onClick={()=>setModalVisible(false)}/>
+                    </div>
+                
                 <Select label='Categoria' >
                     {categories.map((category)=>{
-                        return <Option key={category.id} onClick={() =>getSubcategories(category)}>{category.nome}</Option>
+                        return <Option key={category.id} onClick={() =>getSubcategories(category)}>{category?.nome}</Option>
                     })}
                 </Select>
                 <Select label='Sub-Categoria' >
                     {subcategories.length == 0 ? <Option>{category?.nome}</Option>: subcategories.map((subcategory)=>{
                         return(
-                            <Option key={subcategory.id}>{subcategory.nome}</Option>
+                            <Option key={subcategory.id} onClick={()=>setSubcategory(subcategory)} >{subcategory?.nome}</Option>
                         )
                     })}
                 </Select>
@@ -95,7 +122,7 @@ const Modal = ({modalVisible, setModalVisible}: ModalProps) => {
                     onChange={(e)=>setValor(parseFloat(e.target.value))}
                     className=' text-xl'
                 />
-                <Button onClick={()=> setModalVisible(false)}>
+                <Button onClick={()=> sendOperation()}>
                     <Typography>Registrar</Typography>
                 </Button>
                 </CardBody>
