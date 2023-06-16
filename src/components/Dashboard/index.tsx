@@ -11,7 +11,7 @@
 //lucro-liquido
 
 import type { ReactElement } from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 
 interface InputProps{
@@ -47,314 +47,301 @@ import { FaPiggyBank,FaBalanceScaleRight } from 'react-icons/fa'
 import { AiOutlineBuild } from 'react-icons/ai'
 import { IoMdBuild } from 'react-icons/io'
 
+
 interface DashboardProps {
     modalVisible: boolean
 }
 
-export default function Dashboard({modalVisible}: DashboardProps){
+interface IndicadoresInterface{
+    nome: string,
+    icone: ReactElement,
+    valor: number | undefined,
+    cor: string,
+    inputs?: OperationsInterface[]
+    //"6a787e82-40f4-4436-91ad-0f5b95737d6a"
+}
 
-    const indicadores : Indicador[]= [
+interface OperationsInterface{
+    id: string,
+    subcategoria_id: string,
+    categoria_id: string,
+    valor: number | undefined,
+    descricao: string,
+    data: Date
+}
+
+export default function Dashboard({modalVisible}: DashboardProps){
+    const URI = 'http://localhost:3500'
+    const [operations, setOperations] = useState<OperationsInterface[]>()
+    const [valorReceitas, setValorReceitas] = useState<number | undefined>(0)
+    const [custosVariaveis, setCustosVariaveis] = useState<number | undefined>(0)
+    const [valorMargemContribuicao, setValorMargemContribuicao] = useState<number | undefined>()
+    useEffect(()=>{
+        const getOperations = async() => {
+            try {
+                const operationsRequest = (await axios.get(`${URI}/operations`)).data
+                setOperations(operationsRequest.operations)
+                getReceitas()
+                getCustosVariaveis()
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        getOperations()
+        const getReceitas = () => {
+            const receitas = operations?.filter(operations => operations.categoria_id == '6a787e82-40f4-4436-91ad-0f5b95737d6a')
+            setValorReceitas(receitas?.reduce((lastReceita, currentReceita) => (lastReceita || 0) + (currentReceita.valor || 0), 0))
+        }
+        
+        const getCustosVariaveis = () => {
+            const custosVariaveisRequest = operations?.filter(operations => operations.categoria_id == "9d0823a1-0acf-452a-91e6-73ac640f6d19")
+            const valorTotal = custosVariaveisRequest?.reduce((acc, currentCustoVariavel) =>(acc || 0) + (currentCustoVariavel.valor || 0), 0)
+            setCustosVariaveis(valorTotal)
+        }
+        
+
+    },[])
+
+     const indicadores : IndicadoresInterface[]= [
         {
             nome: 'Receita',
             icone: <HiTrendingUp className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 25500,
+            valor: valorReceitas,
             cor: 'blue-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
+            inputs: operations?.filter(operations => operations.categoria_id == "6a787e82-40f4-4436-91ad-0f5b95737d6a")
         },
         {
             nome: 'Custos-Variáveis',
             icone: <MdOutlineAttachMoney className=' text-gray-50  rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 13000,
+            valor: custosVariaveis,
             cor: 'red-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
+            inputs: operations?.filter(operations => operations.categoria_id == "9d0823a1-0acf-452a-91e6-73ac640f6d19")
         },
         {
             nome: 'Margem de Contribuição',
             icone: <TbMoneybag className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 12500,
+            valor: valorMargemContribuicao,
             cor: 'green-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
-        },
-        {
-            nome: 'Custos-Fixos',
-            icone: <GiPayMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 6000,
-            cor: 'red-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
-        },
-        {
-            nome: 'Lucro Operacional PI',
-            icone: <GiTakeMyMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 6500,
-            cor: 'green-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
-        },
-        {
-            nome: 'Investimento',
-            icone: <FaPiggyBank className=' text-gray-50  rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 0,
-            cor: 'green-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
-        },
-        {
-            nome: 'Lucro Operacional',
-            icone: <MdOutlineAttachMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 6500,
-            cor: 'blue-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
-        },
-        {
-            nome: 'Entradas Não Operacionais',
-            icone: <AiOutlineBuild className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 2000,
-            cor: 'gray-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
-        },
-        {
-            nome: 'Saídas Não Operacionais',
-            icone: <IoMdBuild className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 0,
-            cor: 'gray-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
-        },
-        {
-            nome: 'Lucro-Líquido/ Prejuízo',
-            icone: <FaBalanceScaleRight className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: 8500,
-            cor: 'blue-500',
-            inputs: [
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-                {
-                    nome: 'contas',
-                    valor: 754.38
-                },
-
-              
-            ]
+            inputs: [{
+                id: '',
+                categoria_id: '',
+                subcategoria_id: '',
+                descricao: 'Margem de Contribuição',
+                valor: valorMargemContribuicao ,
+                data: new Date()
+            }]
         }
-    ]
+    //     {
+    //         nome: 'Custos-Fixos',
+    //         icone: <GiPayMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+    //         valor: 6000,
+    //         cor: 'red-500',
+    //         inputs: [
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+
+              
+    //         ]
+    //     },
+    //     {
+    //         nome: 'Lucro Operacional PI',
+    //         icone: <GiTakeMyMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+    //         valor: 6500,
+    //         cor: 'green-500',
+    //         inputs: [
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+
+              
+    //         ]
+    //     },
+    //     {
+    //         nome: 'Investimento',
+    //         icone: <FaPiggyBank className=' text-gray-50  rounded-full h-9 w-9 text-sm p-1'/>,
+    //         valor: 0,
+    //         cor: 'green-500',
+    //         inputs: [
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+
+              
+    //         ]
+    //     },
+    //     {
+    //         nome: 'Lucro Operacional',
+    //         icone: <MdOutlineAttachMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+    //         valor: 6500,
+    //         cor: 'blue-500',
+    //         inputs: [
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+
+              
+    //         ]
+    //     },
+    //     {
+    //         nome: 'Entradas Não Operacionais',
+    //         icone: <AiOutlineBuild className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+    //         valor: 2000,
+    //         cor: 'gray-500',
+    //         inputs: [
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+
+              
+    //         ]
+    //     },
+    //     {
+    //         nome: 'Saídas Não Operacionais',
+    //         icone: <IoMdBuild className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+    //         valor: 0,
+    //         cor: 'gray-500',
+    //         inputs: [
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+
+              
+    //         ]
+    //     },
+    //     {
+    //         nome: 'Lucro-Líquido/ Prejuízo',
+    //         icone: <FaBalanceScaleRight className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+    //         valor: 8500,
+    //         cor: 'blue-500',
+    //         inputs: [
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+    //             {
+    //                 nome: 'contas',
+    //                 valor: 754.38
+    //             },
+
+              
+    //         ]
+       //  }
+     ]
 
     const [open, setOpen] = useState<boolean>(false)
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -362,7 +349,9 @@ export default function Dashboard({modalVisible}: DashboardProps){
     return(
         <Card className={`w-full lg:w-4/5 ${modalVisible?"blur-sm": '' }`}>
                 <List className='rounded-lg '>
-            {indicadores.map((item,i)=>{
+                    
+                    
+            {indicadores.length > 0 ? indicadores.map((item,i)=>{
                 return(
                     
                         
@@ -376,22 +365,22 @@ export default function Dashboard({modalVisible}: DashboardProps){
                                     <ListItemSuffix className={`text-md font-bold text-${item.cor}`}>{item.valor}</ListItemSuffix>
                                 </AccordionHeader>
                                 <AccordionBody>
-                                    {item.inputs.map((input,i)=>{
+                                    {item.inputs? item.inputs?.map((input,i)=>{
                                         return (
                                             <ListItem key={i}>
-                                                <ListItemPrefix>{input.nome}</ListItemPrefix>
-                                                <ListItemSuffix>{input.valor}</ListItemSuffix>
+                                                <ListItemPrefix>{input.descricao ?? '-'}</ListItemPrefix>
+                                                <ListItemSuffix>{input.valor ?? '-'}</ListItemSuffix>
                                                 
                                             </ListItem>
                                         )
-                                    })}
+                                    }): <p>valor</p>}
                                 </AccordionBody>
                             </Accordion>
 
                 )
-            })  }
+            }) : <p>valor</p> }
             
-       </List>
+            </List>
         </Card>
        
     )

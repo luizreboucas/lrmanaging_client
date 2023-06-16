@@ -31,9 +31,10 @@ export default function Dash(){
                     setModalVisible={setModalVisible}/>
                 <Dashboard 
                    modalVisible={modalVisible} />
-                <Modal
+                
+                {modalVisible ? <Modal
                     modalVisible={modalVisible}
-                    setModalVisible={setModalVisible}/>
+                    setModalVisible={setModalVisible}/>: ''}
             </div>
 
         </div>
