@@ -73,8 +73,9 @@ interface OperationsInterface{
 export default function Dashboard({modalVisible}: DashboardProps){
     const URI = 'http://localhost:3500'
     const [operations, setOperations] = useState<OperationsInterface[]>()
-    const [valorReceitas, setValorReceitas] = useState<number | undefined>(0)
-    const [custosVariaveis, setCustosVariaveis] = useState<number | undefined>(0)
+    const [valorReceitas, setValorReceitas] = useState<number>(0)
+    const [custosVariaveis, setCustosVariaveis] = useState<number>(0)
+    const [custosFixos, setCustosFixos] = useState<number>(0)
     const [valorMargemContribuicao, setValorMargemContribuicao] = useState<number | undefined>()
     useEffect(()=>{
         const getOperations = async() => {
@@ -83,26 +84,43 @@ export default function Dashboard({modalVisible}: DashboardProps){
                 setOperations(operationsRequest.operations)
                 getReceitas()
                 getCustosVariaveis()
+                setValorMargemContribuicao((valorReceitas - custosVariaveis).toFixed(2))
+                getCustosFixos()
+               
             } catch (error) {
                 console.log(error)
             }
         }
         getOperations()
         const getReceitas = () => {
-            const receitas = operations?.filter(operations => operations.categoria_id == '6a787e82-40f4-4436-91ad-0f5b95737d6a')
-            setValorReceitas(receitas?.reduce((lastReceita, currentReceita) => (lastReceita || 0) + (currentReceita.valor || 0), 0))
+            const receitas = operations?.filter(operations => operations.categoria_id == '6a787e82-40f4-4436-91ad-0f5b95737d6a') 
+            if(receitas){
+                const total = receitas.reduce((acc,current) => acc + current.valor, 0)
+                    setValorReceitas(total)
+            }
         }
         
         const getCustosVariaveis = () => {
             const custosVariaveisRequest = operations?.filter(operations => operations.categoria_id == "9d0823a1-0acf-452a-91e6-73ac640f6d19")
-            const valorTotal = custosVariaveisRequest?.reduce((acc, currentCustoVariavel) =>(acc || 0) + (currentCustoVariavel.valor || 0), 0)
-            setCustosVariaveis(valorTotal)
+            if(custosVariaveisRequest){
+                const total = custosVariaveisRequest.reduce((acc,current)=> acc + current.valor, 0)
+                setCustosVariaveis(total)
+            }
+            
+        }
+        const getCustosFixos = () => {
+            const custosFixosRequest = operations?.filter(operations => operations.categoria_id == "d51f6c3d-8f58-42ac-ac9c-4b74150dbf47")
+            if(custosFixosRequest){
+                const total = custosFixosRequest.reduce((acc,current)=> acc + current.valor, 0)
+                setCustosFixos(total)
+            }
+            
         }
         
 
-    },[])
+    },[valorMargemContribuicao, custosVariaveis,valorReceitas,operations])
 
-     const indicadores : IndicadoresInterface[]= [
+     const indicadores : IndicadoresInterface[] = [
         {
             nome: 'Receita',
             icone: <HiTrendingUp className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
@@ -113,7 +131,7 @@ export default function Dashboard({modalVisible}: DashboardProps){
         {
             nome: 'Custos-Variáveis',
             icone: <MdOutlineAttachMoney className=' text-gray-50  rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: custosVariaveis,
+            valor:custosVariaveis,
             cor: 'red-500',
             inputs: operations?.filter(operations => operations.categoria_id == "9d0823a1-0acf-452a-91e6-73ac640f6d19")
         },
@@ -130,37 +148,14 @@ export default function Dashboard({modalVisible}: DashboardProps){
                 valor: valorMargemContribuicao ,
                 data: new Date()
             }]
+        },
+        {
+            nome: 'Custos-Fixos',
+            icone: <GiPayMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+            valor: custosFixos,
+            cor: 'red-500',
+            inputs: operations?.filter(operations => operations.categoria_id == "d51f6c3d-8f58-42ac-ac9c-4b74150dbf47")
         }
-    //     {
-    //         nome: 'Custos-Fixos',
-    //         icone: <GiPayMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-    //         valor: 6000,
-    //         cor: 'red-500',
-    //         inputs: [
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-
-              
-    //         ]
-    //     },
     //     {
     //         nome: 'Lucro Operacional PI',
     //         icone: <GiTakeMyMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
