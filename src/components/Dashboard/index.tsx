@@ -57,7 +57,7 @@ interface IndicadoresInterface{
     icone: ReactElement,
     valor: number | undefined,
     cor: string,
-    inputs?: OperationsInterface[]
+    inputs?: OperationsInterface[] | null[]
     //"6a787e82-40f4-4436-91ad-0f5b95737d6a"
 }
 
@@ -77,6 +77,12 @@ export default function Dashboard({modalVisible}: DashboardProps){
     const [custosVariaveis, setCustosVariaveis] = useState<number>(0)
     const [custosFixos, setCustosFixos] = useState<number>(0)
     const [valorMargemContribuicao, setValorMargemContribuicao] = useState<number | undefined>()
+    const [lucroOperacionalPi, setLucroOperacionalPi] = useState<number | undefined>(0)
+    const [totalInvestimentos, setTotalInvestimentos] = useState<number | undefined>(0)
+    const [lucroOperacional, setLucroOperacional] = useState<number | undefined>(0)
+    const [entradasNaoOperacionais , setEntradasNaoOperacionais] = useState<number>(0)
+    const [saidasNaoOperacionais, setSaidasNaoOperacionais] = useState<number>(0)
+    const [lucro, setLucro] = useState<number>()
     useEffect(()=>{
         const getOperations = async() => {
             try {
@@ -86,39 +92,77 @@ export default function Dashboard({modalVisible}: DashboardProps){
                 getCustosVariaveis()
                 setValorMargemContribuicao((valorReceitas - custosVariaveis).toFixed(2))
                 getCustosFixos()
+                getLucroOperacionalPi()
+                getTotalInvestimentos()
+                getLucroOperacional()
+                getEntradasNaoOperacionais()
+                getSaidasNaoOperacionais()
+                getLucro()
                
             } catch (error) {
                 console.log(error)
             }
         }
-        getOperations()
-        const getReceitas = () => {
-            const receitas = operations?.filter(operations => operations.categoria_id == '6a787e82-40f4-4436-91ad-0f5b95737d6a') 
-            if(receitas){
-                const total = receitas.reduce((acc,current) => acc + current.valor, 0)
-                    setValorReceitas(total)
-            }
-        }
+        async() => await getOperations()      
         
-        const getCustosVariaveis = () => {
-            const custosVariaveisRequest = operations?.filter(operations => operations.categoria_id == "9d0823a1-0acf-452a-91e6-73ac640f6d19")
-            if(custosVariaveisRequest){
-                const total = custosVariaveisRequest.reduce((acc,current)=> acc + current.valor, 0)
-                setCustosVariaveis(total)
-            }
-            
-        }
-        const getCustosFixos = () => {
-            const custosFixosRequest = operations?.filter(operations => operations.categoria_id == "d51f6c3d-8f58-42ac-ac9c-4b74150dbf47")
-            if(custosFixosRequest){
-                const total = custosFixosRequest.reduce((acc,current)=> acc + current.valor, 0)
-                setCustosFixos(total)
-            }
-            
-        }
-        
+    },[])
 
-    },[valorMargemContribuicao, custosVariaveis,valorReceitas,operations])
+    
+
+    const getReceitas = () => {
+        const receitas = operations?.filter(operations => operations.categoria_id == '6a787e82-40f4-4436-91ad-0f5b95737d6a') 
+        if(receitas){
+            const total = receitas.reduce((acc,current) => acc + current.valor, 0)
+                setValorReceitas(total)
+        }
+    }
+    
+    const getCustosVariaveis = () => {
+        const custosVariaveisRequest = operations?.filter(operations => operations.categoria_id == "9d0823a1-0acf-452a-91e6-73ac640f6d19")
+        if(custosVariaveisRequest){
+            const total = custosVariaveisRequest.reduce((acc,current)=> acc + current.valor, 0)
+            setCustosVariaveis(total)
+        }
+        
+    }
+    const getCustosFixos = () => {
+        const custosFixosRequest = operations?.filter(operations => operations.categoria_id == "d51f6c3d-8f58-42ac-ac9c-4b74150dbf47")
+        if(custosFixosRequest){
+            const total = custosFixosRequest.reduce((acc,current)=> acc + current.valor, 0)
+            setCustosFixos(total)
+        }
+        
+    }
+    const getLucroOperacionalPi = () => {
+        setLucroOperacionalPi(valorMargemContribuicao? valorMargemContribuicao - custosFixos: 0)
+    }
+    const getTotalInvestimentos = () => {
+        const investimentosArray = operations?.filter((operation) => operation.categoria_id == "599c4090-5088-44ab-a156-ed6fe8848bc9")
+        const total = investimentosArray?.reduce((acc, current)=>  acc + current.valor, 0)
+        setTotalInvestimentos(total)
+    }
+    const getLucroOperacional = () => {
+        setLucroOperacional((lucroOperacionalPi && totalInvestimentos?  lucroOperacionalPi + totalInvestimentos: 0).toFixed(2))
+    }
+    const getEntradasNaoOperacionais = () => {
+        const entradas = operations?.filter((operation) => operation.categoria_id == "76df8600-ba54-4b54-adc0-9781ed37a223")
+        if (entradas){
+            const total = entradas.reduce((acc,entrada) => acc + entrada.valor, 0)
+            setEntradasNaoOperacionais(total)
+        }
+    }
+    const getSaidasNaoOperacionais = () => {
+        const saidas = operations?.filter((operation) => operation.categoria_id == "2d7a8b68-d0dc-48fc-9ad4-b7e4723f610c")
+        if(saidas){
+            const total = saidas.reduce((acc, curr) => acc + curr.valor, 0)
+            setSaidasNaoOperacionais(total)
+        }
+    }
+    const getLucro = () => {
+        setLucro(lucroOperacional? lucroOperacional + entradasNaoOperacionais: 0)
+        
+    }
+
 
      const indicadores : IndicadoresInterface[] = [
         {
@@ -140,14 +184,7 @@ export default function Dashboard({modalVisible}: DashboardProps){
             icone: <TbMoneybag className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
             valor: valorMargemContribuicao,
             cor: 'green-500',
-            inputs: [{
-                id: '',
-                categoria_id: '',
-                subcategoria_id: '',
-                descricao: 'Margem de Contribuição',
-                valor: valorMargemContribuicao ,
-                data: new Date()
-            }]
+            inputs: [null]
         },
         {
             nome: 'Custos-Fixos',
@@ -155,187 +192,49 @@ export default function Dashboard({modalVisible}: DashboardProps){
             valor: custosFixos,
             cor: 'red-500',
             inputs: operations?.filter(operations => operations.categoria_id == "d51f6c3d-8f58-42ac-ac9c-4b74150dbf47")
+        },
+        {
+            nome: 'Lucro Operacional PI',
+            icone: <GiTakeMyMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+            valor: lucroOperacionalPi,
+            cor: 'green-500',
+            inputs: [null]
+        },
+        {
+            nome: 'Investimento',
+            icone: <FaPiggyBank className=' text-gray-50  rounded-full h-9 w-9 text-sm p-1'/>,
+            valor: totalInvestimentos,
+            cor: 'green-500',
+            inputs: operations?.filter((operation) => operation.categoria_id == "599c4090-5088-44ab-a156-ed6fe8848bc9")
+        },
+        {
+            nome: 'Lucro Operacional',
+            icone: <MdOutlineAttachMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+            valor: lucroOperacional,
+            cor: 'blue-500',
+            inputs: [null]
+        },
+        {
+            nome: 'Entradas Não Operacionais',
+            icone: <AiOutlineBuild className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+            valor: entradasNaoOperacionais,
+            cor: 'gray-500',
+            inputs: operations?.filter((operation) => operation.categoria_id == "76df8600-ba54-4b54-adc0-9781ed37a223")
+        },
+        {
+            nome: 'Saídas Não Operacionais',
+            icone: <IoMdBuild className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+            valor: saidasNaoOperacionais,
+            cor: 'gray-500',
+            inputs: operations?.filter((operation) => operation.categoria_id == "2d7a8b68-d0dc-48fc-9ad4-b7e4723f610c")
+        },
+        {
+            nome: 'Lucro-Líquido/ Prejuízo',
+            icone: <FaBalanceScaleRight className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
+            valor: lucro,
+            cor: 'blue-500',
+            inputs: [null]
         }
-    //     {
-    //         nome: 'Lucro Operacional PI',
-    //         icone: <GiTakeMyMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-    //         valor: 6500,
-    //         cor: 'green-500',
-    //         inputs: [
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-
-              
-    //         ]
-    //     },
-    //     {
-    //         nome: 'Investimento',
-    //         icone: <FaPiggyBank className=' text-gray-50  rounded-full h-9 w-9 text-sm p-1'/>,
-    //         valor: 0,
-    //         cor: 'green-500',
-    //         inputs: [
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-
-              
-    //         ]
-    //     },
-    //     {
-    //         nome: 'Lucro Operacional',
-    //         icone: <MdOutlineAttachMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-    //         valor: 6500,
-    //         cor: 'blue-500',
-    //         inputs: [
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-
-              
-    //         ]
-    //     },
-    //     {
-    //         nome: 'Entradas Não Operacionais',
-    //         icone: <AiOutlineBuild className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-    //         valor: 2000,
-    //         cor: 'gray-500',
-    //         inputs: [
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-
-              
-    //         ]
-    //     },
-    //     {
-    //         nome: 'Saídas Não Operacionais',
-    //         icone: <IoMdBuild className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-    //         valor: 0,
-    //         cor: 'gray-500',
-    //         inputs: [
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-
-              
-    //         ]
-    //     },
-    //     {
-    //         nome: 'Lucro-Líquido/ Prejuízo',
-    //         icone: <FaBalanceScaleRight className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-    //         valor: 8500,
-    //         cor: 'blue-500',
-    //         inputs: [
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-    //             {
-    //                 nome: 'contas',
-    //                 valor: 754.38
-    //             },
-
-              
-    //         ]
-       //  }
      ]
 
     const [open, setOpen] = useState<boolean>(false)
@@ -363,8 +262,8 @@ export default function Dashboard({modalVisible}: DashboardProps){
                                     {item.inputs? item.inputs?.map((input,i)=>{
                                         return (
                                             <ListItem key={i}>
-                                                <ListItemPrefix>{input.descricao ?? '-'}</ListItemPrefix>
-                                                <ListItemSuffix>{input.valor ?? '-'}</ListItemSuffix>
+                                                <ListItemPrefix>{input?.descricao ?? '-'}</ListItemPrefix>
+                                                <ListItemSuffix>{input?.valor ?? '-'}</ListItemSuffix>
                                                 
                                             </ListItem>
                                         )

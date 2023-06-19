@@ -31,7 +31,8 @@ const URI = 'http://localhost:3500'
 
 interface ModalProps{
     modalVisible?: boolean
-    setModalVisible: Dispatch<SetStateAction<boolean>>
+    setModalVisible: Dispatch<SetStateAction<boolean>>,
+
 }
 
 const Modal = ({modalVisible, setModalVisible}: ModalProps) => {
