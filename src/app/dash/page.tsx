@@ -23,6 +23,7 @@ export const metadata: Metadata = {
 export default function Dash(){
 
     const [modalVisible, setModalVisible] = useState<boolean>(false)
+    const [reload, setReload] = useState<number>(0)
     return(
         <div>
             <div className='flex w-full'>
@@ -30,11 +31,16 @@ export default function Dash(){
                 <Aside modalVisible={modalVisible}
                     setModalVisible={setModalVisible}/>
                 <Dashboard 
-                   modalVisible={modalVisible} />
+                   modalVisible={modalVisible}
+                   setReload = {setReload} 
+                   reload = {reload}/>
                 
                 {modalVisible ? <Modal
                     modalVisible={modalVisible}
-                    setModalVisible={setModalVisible}/>: ''}
+                    setModalVisible={setModalVisible}
+                    setReload = {setReload}
+                    reload={reload}
+                    />: ''}
             </div>
 
         </div>

@@ -46,16 +46,19 @@ import { GiPayMoney, GiTakeMyMoney } from 'react-icons/gi'
 import { FaPiggyBank,FaBalanceScaleRight } from 'react-icons/fa'
 import { AiOutlineBuild } from 'react-icons/ai'
 import { IoMdBuild } from 'react-icons/io'
+import { Dispatch, SetStateAction } from 'react'
 
 
 interface DashboardProps {
-    modalVisible: boolean
+    modalVisible: boolean,
+    reload: number,
+    setReload: Dispatch<SetStateAction<number>>
 }
 
 interface IndicadoresInterface{
     nome: string,
     icone: ReactElement,
-    valor: number | undefined,
+    valor: number | undefined | string,
     cor: string,
     inputs?: OperationsInterface[] | null[]
     //"6a787e82-40f4-4436-91ad-0f5b95737d6a"
@@ -70,7 +73,7 @@ interface OperationsInterface{
     data: Date
 }
 
-export default function Dashboard({modalVisible}: DashboardProps){
+export default function Dashboard({modalVisible,reload,setReload}: DashboardProps){
     const URI = 'http://localhost:3500'
     const [operations, setOperations] = useState<OperationsInterface[]>()
     const [valorReceitas, setValorReceitas] = useState<number>(0)
@@ -86,83 +89,86 @@ export default function Dashboard({modalVisible}: DashboardProps){
     useEffect(()=>{
         const getOperations = async() => {
             try {
-                const operationsRequest = (await axios.get(`${URI}/operations`)).data
-                setOperations(operationsRequest.operations)
-                getReceitas()
-                getCustosVariaveis()
-                setValorMargemContribuicao((valorReceitas - custosVariaveis).toFixed(2))
-                getCustosFixos()
-                getLucroOperacionalPi()
-                getTotalInvestimentos()
-                getLucroOperacional()
-                getEntradasNaoOperacionais()
-                getSaidasNaoOperacionais()
-                getLucro()
-               
+                const operationsRequest = await axios.get(`${URI}/operations`)
+                setOperations(operationsRequest.data.operations)
+
             } catch (error) {
                 console.log(error)
             }
         }
-        async() => await getOperations()      
-        
-    },[])
-
+        getOperations()
+    },[reload])
     
-
+    useEffect(()=>{
+                getReceitas()
+                getCustosVariaveis()
+                getCustosFixos()
+                getTotalInvestimentos()
+                getEntradasNaoOperacionais()
+                getSaidasNaoOperacionais()
+                
+console.log('roudou2')
+    },[operations])
+    
+    useEffect(()=>{
+        setValorMargemContribuicao(valorReceitas - custosVariaveis)
+        setLucroOperacionalPi(valorMargemContribuicao && custosFixos ? valorMargemContribuicao - custosFixos: 0)
+        setLucroOperacional(valorMargemContribuicao && totalInvestimentos && custosFixos? valorMargemContribuicao + totalInvestimentos - custosFixos: 0)
+        
+        console.log('rodando')
+    },[lucroOperacional,valorMargemContribuicao, valorReceitas,custosFixos,custosVariaveis,totalInvestimentos,entradasNaoOperacionais,saidasNaoOperacionais,lucro])
+    
+    useEffect(()=>{
+        setLucro(lucroOperacional + entradasNaoOperacionais - saidasNaoOperacionais)
+    },[lucroOperacional, entradasNaoOperacionais, saidasNaoOperacionais])
+        
     const getReceitas = () => {
-        const receitas = operations?.filter(operations => operations.categoria_id == '6a787e82-40f4-4436-91ad-0f5b95737d6a') 
-        if(receitas){
-            const total = receitas.reduce((acc,current) => acc + current.valor, 0)
-                setValorReceitas(total)
+            const receitas = operations?.filter(operations => operations.categoria_id == '6a787e82-40f4-4436-91ad-0f5b95737d6a') 
+            if(receitas){
+                const total = receitas.reduce((acc,current) => acc + current.valor, 0)
+                    setValorReceitas(total)
+            }
         }
-    }
+        
+        const getCustosVariaveis = () => {
+            const custosVariaveisRequest = operations?.filter(operations => operations.categoria_id == "9d0823a1-0acf-452a-91e6-73ac640f6d19")
+            if(custosVariaveisRequest){
+                const total = custosVariaveisRequest.reduce((acc,current)=> acc + current.valor, 0)
+                setCustosVariaveis(total)
+            }
+            
+        }
+        const getCustosFixos = () => {
+            const custosFixosRequest = operations?.filter(operations => operations.categoria_id == "d51f6c3d-8f58-42ac-ac9c-4b74150dbf47")
+            if(custosFixosRequest){
+                const total = custosFixosRequest.reduce((acc,current)=> acc + current.valor, 0)
+                setCustosFixos(total)
+            }
+            
+        }
+        
+        const getTotalInvestimentos = () => {
+            const investimentosArray = operations?.filter((operation) => operation.categoria_id == "599c4090-5088-44ab-a156-ed6fe8848bc9")
+            const total = investimentosArray?.reduce((acc, current)=>  acc + current.valor, 0)
+            setTotalInvestimentos(total)
+        }
+        
+        const getEntradasNaoOperacionais = () => {
+            const entradas = operations?.filter((operation) => operation.categoria_id == "76df8600-ba54-4b54-adc0-9781ed37a223")
+            if (entradas){
+                const total = entradas.reduce((acc,entrada) => acc + entrada.valor, 0)
+                setEntradasNaoOperacionais(total)
+            }
+        }
+        const getSaidasNaoOperacionais = () => {
+            const saidas = operations?.filter((operation) => operation.categoria_id == "2d7a8b68-d0dc-48fc-9ad4-b7e4723f610c")
+            if(saidas){
+                const total = saidas.reduce((acc, curr) => acc + curr.valor, 0)
+                setSaidasNaoOperacionais(total)
+            }
+        }
+       
     
-    const getCustosVariaveis = () => {
-        const custosVariaveisRequest = operations?.filter(operations => operations.categoria_id == "9d0823a1-0acf-452a-91e6-73ac640f6d19")
-        if(custosVariaveisRequest){
-            const total = custosVariaveisRequest.reduce((acc,current)=> acc + current.valor, 0)
-            setCustosVariaveis(total)
-        }
-        
-    }
-    const getCustosFixos = () => {
-        const custosFixosRequest = operations?.filter(operations => operations.categoria_id == "d51f6c3d-8f58-42ac-ac9c-4b74150dbf47")
-        if(custosFixosRequest){
-            const total = custosFixosRequest.reduce((acc,current)=> acc + current.valor, 0)
-            setCustosFixos(total)
-        }
-        
-    }
-    const getLucroOperacionalPi = () => {
-        setLucroOperacionalPi(valorMargemContribuicao? valorMargemContribuicao - custosFixos: 0)
-    }
-    const getTotalInvestimentos = () => {
-        const investimentosArray = operations?.filter((operation) => operation.categoria_id == "599c4090-5088-44ab-a156-ed6fe8848bc9")
-        const total = investimentosArray?.reduce((acc, current)=>  acc + current.valor, 0)
-        setTotalInvestimentos(total)
-    }
-    const getLucroOperacional = () => {
-        setLucroOperacional((lucroOperacionalPi && totalInvestimentos?  lucroOperacionalPi + totalInvestimentos: 0).toFixed(2))
-    }
-    const getEntradasNaoOperacionais = () => {
-        const entradas = operations?.filter((operation) => operation.categoria_id == "76df8600-ba54-4b54-adc0-9781ed37a223")
-        if (entradas){
-            const total = entradas.reduce((acc,entrada) => acc + entrada.valor, 0)
-            setEntradasNaoOperacionais(total)
-        }
-    }
-    const getSaidasNaoOperacionais = () => {
-        const saidas = operations?.filter((operation) => operation.categoria_id == "2d7a8b68-d0dc-48fc-9ad4-b7e4723f610c")
-        if(saidas){
-            const total = saidas.reduce((acc, curr) => acc + curr.valor, 0)
-            setSaidasNaoOperacionais(total)
-        }
-    }
-    const getLucro = () => {
-        setLucro(lucroOperacional? lucroOperacional + entradasNaoOperacionais: 0)
-        
-    }
-
 
      const indicadores : IndicadoresInterface[] = [
         {
@@ -182,7 +188,7 @@ export default function Dashboard({modalVisible}: DashboardProps){
         {
             nome: 'Margem de Contribuição',
             icone: <TbMoneybag className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: valorMargemContribuicao,
+            valor: valorMargemContribuicao?.toFixed(2),
             cor: 'green-500',
             inputs: [null]
         },
@@ -196,7 +202,7 @@ export default function Dashboard({modalVisible}: DashboardProps){
         {
             nome: 'Lucro Operacional PI',
             icone: <GiTakeMyMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: lucroOperacionalPi,
+            valor: lucroOperacionalPi?.toFixed(2),
             cor: 'green-500',
             inputs: [null]
         },
@@ -210,7 +216,7 @@ export default function Dashboard({modalVisible}: DashboardProps){
         {
             nome: 'Lucro Operacional',
             icone: <MdOutlineAttachMoney className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: lucroOperacional,
+            valor: lucroOperacional?.toFixed(2) ,
             cor: 'blue-500',
             inputs: [null]
         },
@@ -231,7 +237,7 @@ export default function Dashboard({modalVisible}: DashboardProps){
         {
             nome: 'Lucro-Líquido/ Prejuízo',
             icone: <FaBalanceScaleRight className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
-            valor: lucro,
+            valor: lucro?.toFixed(2),
             cor: 'blue-500',
             inputs: [null]
         }
@@ -267,7 +273,7 @@ export default function Dashboard({modalVisible}: DashboardProps){
                                                 
                                             </ListItem>
                                         )
-                                    }): <p>valor</p>}
+                                    }): ''}
                                 </AccordionBody>
                             </Accordion>
 
