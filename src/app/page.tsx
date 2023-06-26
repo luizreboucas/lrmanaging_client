@@ -8,8 +8,9 @@ import {
 } from "@material-tailwind/react";
 import BgImage from '../../public/6229517.jpg'
 import Image from "next/image";
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useRouter } from "next/navigation";
 
 interface IUSer{
   email?: string,
@@ -19,18 +20,54 @@ interface IUSer{
 const URI = 'http://localhost:3500'
 
 export default function Home() {
+  const router = useRouter()
+
+  
 
   const [user,setUser] = useState<IUSer>({
     email: '',
     senha: ''
   })
+  const [token, setToken] = useState<string>('')
+
+  useEffect(()=>{
+    const validateLogin = async() => {
+      try {
+        const status = await validateToken(token)
+        if(status === 200){
+          console.log('acesso permitido')
+          router.push('/dash')
+        }
+      } catch (error) {
+        console.log({error})
+      }
+    }
+    validateLogin()
+
+  },[token])
+
   const login = async() => {
     try {
       console.log(user) 
-      const response = await axios.post(`${URI}/login`, user)
-      console.log(response)
+      const response = await (await axios.post(`${URI}/login`, user)).data.token
+      setToken(response)
+      
     } catch (error) {
-      console.log(error)
+      console.log('não permitiu entrar: ' + error)
+    }
+  }
+
+  const validateToken = async(tkn: (string | undefined)) => {
+    try {
+      console.log('token no validate token: ' + tkn)
+      const response = await axios.post(`${URI}/validate`, {}, {
+        headers: {
+          token: tkn
+        }
+      })
+      return response.status
+    } catch (error) {
+      return {error}
     }
   }
   return (
@@ -40,8 +77,9 @@ export default function Home() {
         <Image 
         src={BgImage}
         alt="imagem de gestão financeira"
-        className="w-screen"
-        fill={true}
+        className="object-cover h-screen"
+
+        
         />
         
       
@@ -81,8 +119,7 @@ export default function Home() {
             Cadastrar
           </a>
         </Typography>
-        <div>{user.email}</div>
-        <div>{user.senha}</div>
+        
       </form>
     </Card>
 

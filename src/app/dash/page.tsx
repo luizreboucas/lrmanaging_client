@@ -4,6 +4,7 @@ import Dashboard from '../../components/Dashboard'
 import Aside from '@/components/Aside'
 import Modal from '@/components/Modal'
 import { useState } from 'react'
+
 //receitas*
 //custo-variaves*
 //margem-de-contribuicao
@@ -24,16 +25,20 @@ export default function Dash(){
 
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [reload, setReload] = useState<number>(0)
+    const [isAdmin, setIsAdmin] = useState<boolean>(false)
     return(
         <div>
             <div className='flex w-full'>
+
                 
                 <Aside modalVisible={modalVisible}
-                    setModalVisible={setModalVisible}/>
-                <Dashboard 
+                    setModalVisible={setModalVisible}
+                    isAdmin = {isAdmin}/>
+                {isAdmin? <Dashboard 
                    modalVisible={modalVisible}
                    setReload = {setReload} 
-                   reload = {reload}/>
+                   reload = {reload}/>: ''}    
+                
                 
                 {modalVisible ? <Modal
                     modalVisible={modalVisible}

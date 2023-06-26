@@ -1,6 +1,6 @@
 'use client'
 
-import { List, ListItem, ListItemPrefix, Button, Card, Typography } from '@material-tailwind/react'
+import { List, ListItem, ListItemPrefix, Button, Card, Typography, Drawer } from '@material-tailwind/react'
 import { BiPlusMedical,BiLogOut } from 'react-icons/bi'
 import { CgProfile } from 'react-icons/cg'
 import { Dispatch, SetStateAction } from 'react'
@@ -8,16 +8,18 @@ import axios from 'axios'
 
 interface AsideProps{
     modalVisible?: boolean
-    setModalVisible: Dispatch<SetStateAction<boolean>>
+    setModalVisible: Dispatch<SetStateAction<boolean>>,
+    isAdmin: boolean
 }
 
-export default function Aside({modalVisible, setModalVisible}: AsideProps){
+export default function Aside({modalVisible, setModalVisible, isAdmin}: AsideProps){
 
    
     return(
-        <div className={`w-1/5 ${modalVisible?"blur-sm": '' }`}>
-            <Card className='h-screen'>
-            <List>
+        <div className={` ${modalVisible?"blur-sm": '' }`}>
+            
+            <Card className={`h-screen w-screen ${!isAdmin? 'flex justify-center items-center': '' }`}>
+            <List >
                 <ListItem>
                     <Button className='flex items-center'>
                         <BiPlusMedical/>
@@ -50,6 +52,7 @@ export default function Aside({modalVisible, setModalVisible}: AsideProps){
                 
             </List>
             </Card>
+            
             
         </div>
         
