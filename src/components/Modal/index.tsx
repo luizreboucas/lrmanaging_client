@@ -32,10 +32,12 @@ const URI = 'http://localhost:3500'
 interface ModalProps{
     modalVisible?: boolean
     setModalVisible: Dispatch<SetStateAction<boolean>>,
+    setReload: Dispatch<SetStateAction<number>>
+    reload: number
 
 }
 
-const Modal = ({modalVisible, setModalVisible}: ModalProps) => {
+const Modal = ({modalVisible, setModalVisible,setReload, reload}: ModalProps) => {
     const [categories, setCategories] = useState<Category[]>([])
     const [category, setCategory] = useState<Category>()
     const [subcategories, setSubcategories] = useState<Subcategory[]>([])
@@ -81,6 +83,7 @@ const Modal = ({modalVisible, setModalVisible}: ModalProps) => {
             const response = await axios.post(`${URI}/operations`,operation)
             console.log(response)
             console.log(operation)
+            setReload(reload + 1)
             setModalVisible(false)
         } catch (error) {
             console.log(error)
