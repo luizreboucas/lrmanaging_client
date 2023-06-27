@@ -235,7 +235,7 @@ console.log('roudou2')
             inputs: operations?.filter((operation) => operation.categoria_id == "2d7a8b68-d0dc-48fc-9ad4-b7e4723f610c")
         },
         {
-            nome: 'Lucro-Líquido/ Prejuízo',
+            nome: 'Lucro',
             icone: <FaBalanceScaleRight className=' text-gray-50 rounded-full h-9 w-9 text-sm p-1'/>,
             valor: lucro?.toFixed(2),
             cor: 'blue-500',
@@ -261,7 +261,7 @@ console.log('roudou2')
                                         {item.icone}
                                     </div>
                                     
-                                    <Typography className='font-bold text-lg ml-4 text-gray-700' >{item.nome}</Typography>
+                                    <Typography className='font-bold text-md ml-4 text-gray-700' >{item.nome}</Typography>
                                     <ListItemSuffix className={`text-md font-bold text-${item.cor}`}>{item.valor}</ListItemSuffix>
                                 </AccordionHeader>
                                 <AccordionBody>

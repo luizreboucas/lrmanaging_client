@@ -25,7 +25,7 @@ export default function Dash(){
 
     const [modalVisible, setModalVisible] = useState<boolean>(false)
     const [reload, setReload] = useState<number>(0)
-    const [isAdmin, setIsAdmin] = useState<boolean>(false)
+    const [isAdmin, setIsAdmin] = useState<boolean>(true)
     return(
         <div>
             <div className='flex w-full'>

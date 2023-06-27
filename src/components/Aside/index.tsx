@@ -18,7 +18,7 @@ export default function Aside({modalVisible, setModalVisible, isAdmin}: AsidePro
     return(
         <div className={` ${modalVisible?"blur-sm": '' }`}>
             
-            <Card className={`h-screen w-screen ${!isAdmin? 'flex justify-center items-center': '' }`}>
+            <Card className={`h-screen  ${!isAdmin? 'w-screen flex justify-center items-center': '' }`}>
             <List >
                 <ListItem>
                     <Button className='flex items-center'>
