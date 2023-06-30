@@ -14,8 +14,8 @@ import { useRouter } from "next/navigation";
 
 interface IUSer{
   email?: string,
-  senha?: string,
-  organization?: string
+  senha?: string
+ 
 }
 
 const URI = 'http://localhost:3500'
@@ -27,8 +27,7 @@ export default function Home() {
 
   const [user,setUser] = useState<IUSer>({
     email: '',
-    senha: '',
-    organization: ''
+    senha: ''
   })
   const [token, setToken] = useState<string>('')
 
@@ -103,7 +102,7 @@ export default function Home() {
       <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
         <div className="mb-4 flex flex-col gap-6">
           <Input size="lg" label="Email" onChange={(e)=> setUser({...user, email: e.target.value})}/>
-          <Input size="lg" label="Filiação" onChange={(e)=> setUser({...user, organization: e.target.value})}/>
+          <Input size="lg" label="senha" onChange={(e)=> setUser({...user, senha: e.target.value})}/>
    
         </div>
         
