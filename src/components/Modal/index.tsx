@@ -1,5 +1,6 @@
 'use client'
 import React, { useState,useEffect, Dispatch, SetStateAction } from 'react'
+import { useAppSelector } from '@/redux/store'
 import axios from 'axios'
 import {
     Card,
@@ -12,12 +13,7 @@ import {
     CardBody
 } from '@material-tailwind/react'
 import { CgClose } from 'react-icons/cg'
-// const { 
-// 				categoria_id,
-// 				subcategoria_id,
-// 				descricao,
-// 				valor, 
-// 			}
+
 interface Category{
     id: string,
     nome: string
@@ -48,10 +44,20 @@ const Modal = ({modalVisible, setModalVisible,setReload, reload}: ModalProps) =>
     })
     const [descricao, setDescricao] = useState<string>('')
     const [valor, setValor] = useState<number>(0)
+    const [user,setUser] = useState({
+        id: '',
+        nome: '',
+        email: '',
+        is_admin: false,
+        organization_id: '',
+        senha: ''
+    })
+    const updatedUser = useAppSelector(state => state.userReducer)
     
     useEffect(()=>{
         const getCategories = async() =>{
             try {
+                setUser(updatedUser)
                 const categoriesRequest = (await axios.get(`${URI}/categories`)).data
                 setCategories(categoriesRequest)
             } catch (error) {
@@ -72,13 +78,18 @@ const Modal = ({modalVisible, setModalVisible,setReload, reload}: ModalProps) =>
         }
     }
 
+    
     const sendOperation = async() => {
         try {
+            console.log(updatedUser)
             const operation = {
                 categoria_id: category?.id,
- 				subcategoria_id: subcategory?.id,
+ 				subcategoria_id: subcategory.id? subcategory.id: '2863f24a-6c14-4741-8ccf-d832675840cf',
  				descricao,
-			    valor
+			    valor,
+                organization_id: updatedUser.organization_id
+                
+                
             }
             const response = await axios.post(`${URI}/operations`,operation)
             console.log(response)

@@ -13,6 +13,7 @@
 import type { ReactElement } from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useAppSelector } from '../../redux/store'
 
 interface InputProps{
     nome: string,
@@ -73,6 +74,8 @@ interface OperationsInterface{
     data: Date
 }
 
+
+
 export default function Dashboard({modalVisible,reload,setReload}: DashboardProps){
     const URI = 'http://localhost:3500'
     const [operations, setOperations] = useState<OperationsInterface[]>()
@@ -86,10 +89,24 @@ export default function Dashboard({modalVisible,reload,setReload}: DashboardProp
     const [entradasNaoOperacionais , setEntradasNaoOperacionais] = useState<number>(0)
     const [saidasNaoOperacionais, setSaidasNaoOperacionais] = useState<number>(0)
     const [lucro, setLucro] = useState<number>()
+    const [user,setUser] = useState({
+        id: '',
+        nome: '',
+        email: '',
+        is_admin: false,
+        organization_id: '',
+        senha: ''
+    })
+
+    const updatedUSer = useAppSelector(state => state.userReducer)
+    
+    
     useEffect(()=>{
+        
         const getOperations = async() => {
             try {
-                const operationsRequest = await axios.get(`${URI}/operations`)
+                setUser(updatedUSer)
+                const operationsRequest = await axios.get(`${URI}/operations/${user.organization_id}`)
                 setOperations(operationsRequest.data.operations)
 
             } catch (error) {

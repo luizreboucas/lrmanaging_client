@@ -11,6 +11,9 @@ import Image from "next/image";
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter } from "next/navigation";
+import { setUserAction } from '../redux/reducers/userSlice'
+import { useDispatch } from 'react-redux'
+import { useAppSelector } from '../redux/store'
 
 interface IUSer{
   email?: string,
@@ -26,17 +29,20 @@ export default function Home() {
   
 
   const [user,setUser] = useState<IUSer>({
-    email: '',
-    senha: ''
+    email: '1234@1234.com',
+    senha: '1234'
   })
   const [token, setToken] = useState<string>('')
+
+  const dispatch = useDispatch()
+  const userId = useAppSelector((state) => state.userReducer.id)
 
   useEffect(()=>{
     const validateLogin = async() => {
       try {
         const status = await validateToken(token)
         if(status === 200){
-          console.log('acesso permitido')
+          
           router.push('/dash')
         }
       } catch (error) {
@@ -50,8 +56,11 @@ export default function Home() {
   const login = async() => {
     try {
       console.log(user) 
-      const response = await (await axios.post(`${URI}/login`, user)).data.token
-      setToken(response)
+      const response = await (await axios.post(`${URI}/login`, user)).data
+      setToken(response.token)
+      console.log(response)
+      dispatch(setUserAction(response.user))
+      
       
     } catch (error) {
       console.log('não permitiu entrar: ' + error)
@@ -61,6 +70,7 @@ export default function Home() {
   const validateToken = async(tkn: (string | undefined)) => {
     try {
       console.log('token no validate token: ' + tkn)
+      await axios.get(`${URI}/cookie/12345`)
       const response = await axios.post(`${URI}/validate`, {}, {
         headers: {
           token: tkn
@@ -112,6 +122,7 @@ export default function Home() {
           onClick={()=>login()}>
           Entrar
         </Button>
+        <p>{userId}</p>
         <Typography color="gray" className="mt-4 text-center font-normal">
           ainda não tem uma conta?{" "}
           <a
