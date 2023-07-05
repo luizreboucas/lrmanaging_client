@@ -82,7 +82,7 @@ export default function Home() {
     }
   }
   return (
-    <div className="flex items-center  h-screen w-screen">
+    <div className="flex items-center  h-screen w-screen bg-white px-4">
       <div className={`md:h-screen md:w-1/2 xl:h-screen xl:w-2/3 md:flex hidden relative`}>
         
         <Image 
@@ -96,28 +96,28 @@ export default function Home() {
       
       </div>
       
-      <div className="md:w-1/2 w-screen  xl:w-1/3  flex flex-col items-center">
-      <div className="mb-10  w-80 max-w-screen-lg sm:w-96">
-          <h1 className="text-4xl font-extrabold text-blue-700  mt-10">QuikPocket</h1>
-          <h2 className="text-xl mt-16 text-gray-800">Seja Bem-Vindo ao QuikPocket</h2>
+      <div className="md:w-1/2 w-full  xl:w-1/3  flex flex-col items-center">
+      <div className="mb-10   ">
+          <h1 className="text-4xl font-extrabold text-blue-700 ">QuikPocket</h1>
+          <h2 className="text-xl mt-4 sm:mt-16 text-gray-800">Seja Bem-Vindo ao QuikPocket</h2>
         </div>  
       
-      <Card color="transparent" shadow={false} >
+      <Card color="transparent" shadow={false} className=" w-full h-1/2">
       <Typography variant="h4" color="blue-gray">
         Entrar
       </Typography>
       <Typography color="gray" className="mt-1 font-normal">
         Preencha com seus dados para entrar
       </Typography>
-      <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
+      <form className="sm:mt-8 sm:mb-2 sm:w-96">
         <div className="mb-4 flex flex-col gap-6">
-          <Input size="lg" label="Email" onChange={(e)=> setUser({...user, email: e.target.value})}/>
-          <Input size="lg" label="senha" onChange={(e)=> setUser({...user, senha: e.target.value})}/>
+          <Input size="md" label="Email" onChange={(e)=> setUser({...user, email: e.target.value})}/>
+          <Input size="md" label="senha" onChange={(e)=> setUser({...user, senha: e.target.value})}/>
    
         </div>
         
         <Button 
-          className="mt-6" 
+          className="sm:mt-6" 
           fullWidth
           onClick={()=>login()}>
           Entrar

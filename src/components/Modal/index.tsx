@@ -101,8 +101,8 @@ const Modal = ({modalVisible, setModalVisible,setReload, reload}: ModalProps) =>
         }
     }
   return (
-    <div className={`ml-auto mr-auto absolute w-3/4 mb-auto mt-auto ${modalVisible? '': 'hidden'}`}>
-        <Card className='shadow-2xl'>
+    <div className={`h-full w-full flex justify-center items-center bg-orange-300  absolute  ${modalVisible? '': 'hidden'}`}>
+        <Card className='shadow-2xl overflow-hidden min-w-fit sm-w-screen '>
             <form action="">
                 
                 
