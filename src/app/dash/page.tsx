@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import Dashboard from '../../components/Dashboard'
 import Aside from '@/components/Aside'
 import Modal from '@/components/Modal'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { GiHamburgerMenu } from 'react-icons/gi'
 import { Card } from '@material-tailwind/react'
 
@@ -29,10 +29,22 @@ export default function Dash(){
     const [reload, setReload] = useState<number>(0)
     const [isAdmin, setIsAdmin] = useState<boolean>(true)
     const [asideVisible, setAsideVisible] = useState<boolean>(false)
+    const [windowWidth, setWindowWidth] = useState<number>()
+
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth)
+            console.log(windowWidth)
+        }
+
+        window.addEventListener('resize', handleResize)
+        handleResize()
+    },[])
+
     return(
         <div>
             <div className='flex flex-col w-full'>
-                <div className='rounded-lg text-3xl h-20 bg-white mb-4 mt-8 flex justify-between items-center px-2'>
+                <div className='rounded-lg text-3xl h-20 bg-white mb-4 mt-8 px-4 flex justify-between items-center w-full sm:w-1/2'>
                     <GiHamburgerMenu
                         className='h-full'
                         onClick={() => setAsideVisible(!asideVisible)}
