@@ -124,13 +124,13 @@ export default function Dashboard({modalVisible,reload,setReload}: DashboardProp
         
         const getOperations = async() => {
             try {
-                if(updatedUser){
+                if(updatedUser !== null || updatedUser !== undefined){
                     setUser(updatedUser)
                 }else{
                     setUser(userFromLocalStorage)
                 }
                 console.log(user)
-                const operationsRequest = await axios.get(`${URI}/operations/${user? user.organization_id : ''}`)
+                const operationsRequest = await axios.get(`${URI}/operations/${user? user.organization_id : localStorage.getItem('organization_id')}`)
                 setOperations(operationsRequest.data.operations)
 
             } catch (error) {
@@ -138,7 +138,7 @@ export default function Dashboard({modalVisible,reload,setReload}: DashboardProp
             }
         }
         getOperations()
-    },[useAppSelector(state => state.userReducer)])
+    },[reload])
     
     useEffect(()=>{
                 getReceitas()

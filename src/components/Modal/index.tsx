@@ -14,6 +14,7 @@ import {
     CardBody
 } from '@material-tailwind/react'
 import { CgClose } from 'react-icons/cg'
+import { setUserAction } from '@/redux/reducers/userSlice'
 
 interface Category{
     id: string,
@@ -88,12 +89,12 @@ const Modal = ({modalVisible, setModalVisible,setReload, reload}: ModalProps) =>
  				subcategoria_id: subcategory.id? subcategory.id: '2863f24a-6c14-4741-8ccf-d832675840cf',
  				descricao,
 			    valor,
-                organization_id: updatedUser.organization_id
+                organization_id: localStorage.getItem('organization_id')
                 
                 
             }
             const response = await axios.post(`${URI}/operations`,operation)
-            const updateUSer = useDispatch(setUserAction)
+            
             console.log(response)
             console.log(operation)
             setReload(reload + 1)
