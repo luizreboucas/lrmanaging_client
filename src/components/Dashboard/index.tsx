@@ -14,6 +14,7 @@ import type { ReactElement } from 'react'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useAppSelector } from '../../redux/store'
+import jwt from 'jsonwebtoken'
 
 interface InputProps{
     nome: string,
@@ -74,6 +75,17 @@ interface OperationsInterface{
     data: Date
 }
 
+interface IUser{
+    
+        id?: string | null,
+        nome?: string | null,
+        email?: string | null,
+        is_admin?: boolean,
+        organization_id?: string | null,
+        senha?: string | null
+
+}
+
 
 
 export default function Dashboard({modalVisible,reload,setReload}: DashboardProps){
@@ -89,7 +101,7 @@ export default function Dashboard({modalVisible,reload,setReload}: DashboardProp
     const [entradasNaoOperacionais , setEntradasNaoOperacionais] = useState<number>(0)
     const [saidasNaoOperacionais, setSaidasNaoOperacionais] = useState<number>(0)
     const [lucro, setLucro] = useState<number>()
-    const [user,setUser] = useState({
+    const [user,setUser] = useState<IUser>({
         id: '',
         nome: '',
         email: '',
@@ -98,15 +110,27 @@ export default function Dashboard({modalVisible,reload,setReload}: DashboardProp
         senha: ''
     })
 
-    const updatedUSer = useAppSelector(state => state.userReducer)
-    
+    const updatedUser = useAppSelector(state => state.userReducer)
+    const userFromLocalStorage : IUser = {
+        id: localStorage.getItem('id'),
+        email: localStorage.getItem('email'),
+        is_admin: localStorage.getItem('is_admin') === 'true',
+        nome: localStorage.getItem('nome'),
+        organization_id: localStorage.getItem('organization_id'),
+        senha: localStorage.getItem('senha')
+    }
     
     useEffect(()=>{
         
         const getOperations = async() => {
             try {
-                setUser(updatedUSer)
-                const operationsRequest = await axios.get(`${URI}/operations/${user.organization_id}`)
+                if(updatedUser){
+                    setUser(updatedUser)
+                }else{
+                    setUser(userFromLocalStorage)
+                }
+                console.log(user)
+                const operationsRequest = await axios.get(`${URI}/operations/${user? user.organization_id : ''}`)
                 setOperations(operationsRequest.data.operations)
 
             } catch (error) {
@@ -114,7 +138,7 @@ export default function Dashboard({modalVisible,reload,setReload}: DashboardProp
             }
         }
         getOperations()
-    },[reload])
+    },[useAppSelector(state => state.userReducer)])
     
     useEffect(()=>{
                 getReceitas()
@@ -278,8 +302,8 @@ console.log('roudou2')
                                         {item.icone}
                                     </div>
                                     
-                                    <Typography className='font-bold text-md ml-4 text-gray-700' >{item.nome}</Typography>
-                                    <ListItemSuffix className={`text-md font-bold text-${item.cor}`}>{item.valor}</ListItemSuffix>
+                                    <Typography className='font-bold text-sm ml-4 text-gray-700' >{item.nome}</Typography>
+                                    <ListItemSuffix className={`text-sm font-bold text-${item.cor}`}>{item.valor}</ListItemSuffix>
                                 </AccordionHeader>
                                 <AccordionBody>
                                     {item.inputs? item.inputs?.map((input,i)=>{

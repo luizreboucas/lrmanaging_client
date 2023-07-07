@@ -2,6 +2,7 @@
 import React, { useState,useEffect, Dispatch, SetStateAction } from 'react'
 import { useAppSelector } from '@/redux/store'
 import axios from 'axios'
+import { useDispatch } from 'react-redux'
 import {
     Card,
     Input,
@@ -92,6 +93,7 @@ const Modal = ({modalVisible, setModalVisible,setReload, reload}: ModalProps) =>
                 
             }
             const response = await axios.post(`${URI}/operations`,operation)
+            const updateUSer = useDispatch(setUserAction)
             console.log(response)
             console.log(operation)
             setReload(reload + 1)

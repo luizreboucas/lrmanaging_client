@@ -35,14 +35,19 @@ export default function Home() {
   const [token, setToken] = useState<string>('')
 
   const dispatch = useDispatch()
-  const userId = useAppSelector((state) => state.userReducer.id)
+  const userRedux = useAppSelector((state) => state.userReducer)
 
   useEffect(()=>{
     const validateLogin = async() => {
       try {
         const status = await validateToken(token)
         if(status === 200){
-          
+          localStorage.setItem('id', userRedux.id)
+          localStorage.setItem('email', userRedux.email)
+          localStorage.setItem('is_admin', `${userRedux.is_admin}`)
+          localStorage.setItem('nome', userRedux.nome)
+          localStorage.setItem('organization_id', userRedux.organization_id)
+          localStorage.setItem('senha', userRedux.senha)
           router.push('/dash')
         }
       } catch (error) {
@@ -70,7 +75,7 @@ export default function Home() {
   const validateToken = async(tkn: (string | undefined)) => {
     try {
       console.log('token no validate token: ' + tkn)
-      await axios.get(`${URI}/cookie/12345`)
+      
       const response = await axios.post(`${URI}/validate`, {}, {
         headers: {
           token: tkn
@@ -122,7 +127,7 @@ export default function Home() {
           onClick={()=>login()}>
           Entrar
         </Button>
-        <p>{userId}</p>
+        
         <Typography color="gray" className="mt-4 text-center font-normal">
           ainda não tem uma conta?{" "}
           <a
